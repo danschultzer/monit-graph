@@ -1,0 +1,5 @@
+check system localhost										# Change localhost to actual system name
+	if memory usage > 90% for 2 cycles then alert
+	if cpu usage (user) > 90% for 2 cycles then alert
+	if loadavg (5min) > 0.9 for 2 cycles then alert
+	if swap usage > 5% then alert
