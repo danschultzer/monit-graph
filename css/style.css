@@ -6,6 +6,15 @@ body {
 	padding:10px;
 }
 
+a {
+	color:#5050a7;
+	text-decoration:none;
+}
+
+a:hover {
+	color:#8080e7;
+}
+
 .clear{
   clear:both;
 }
@@ -65,4 +74,17 @@ body {
 	background-color: #d0d0d0;
 	font-weight:bold;
 	height:30px;
+}
+.server_box .service_header div, .server_box .service_row div {
+	float:left;
+	width:150px;
+}
+
+.server_box div strong {
+	display:block;
+}
+
+.server_box .actions {
+	width:100%;
+	text-align:center;
 }

@@ -38,5 +38,18 @@
 	require_once($current_dirname."config.php");
 	require_once($current_dirname."monit-graph.class.php");
 
-	MonitGraph::cron($monit_url, $monit_uri_xml, $monit_url_ssl, $monit_http_username, $monit_http_password, $verify_ssl, $chunk_size, $limit_number_of_chunks);
+	if(!MonitGraph::checkConfig($server_configs)) die();
+
+	/* Running each instance of the config */
+	foreach($server_configs as $config){
+		MonitGraph::cron($config['server_id'],
+						$config['config']['url'],
+						$config['config']['uri_xml'],
+						$config['config']['url_ssl'],
+						$config['config']['http_username'],
+						$config['config']['http_password'],
+						$config['config']['verify_ssl'],
+						$chunk_size,
+						$limit_number_of_chunks);
+	}
 ?>

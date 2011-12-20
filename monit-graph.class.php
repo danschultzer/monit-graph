@@ -59,14 +59,45 @@
 		const server_xml_file_name = 'server.xml';
 
 		/**
+		 * Testing the server configs
+		*/
+		public static function checkConfig($server_configs){
+			$id = array();
+			$url = array();
+			foreach($server_configs as $config){
+				$id[] = $config['server_id'];
+				$url[] = $config['config']['url'];
+			}
+			if(count($id) != count(array_unique($id))){
+				error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": ID's in server config needs to be unique");
+				return false;
+			}
+			if(count($url) != count(array_unique($url))){
+				error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": You should not use the same URL for individual servers");
+				return false;
+			}
+			return true;
+		}
+
+		/**
 		 * Running cron
 		 *
 		 * Will connect and download data from the monit URL.
 		*/
-		public static function cron($monit_url, $monit_uri_xml, $monit_url_ssl = true, $monit_http_username = "", $monit_http_password = "", $verify_ssl = true, $chunk_size = 0, $number_of_chunks = 0){
+		public static function cron($server_id,
+									$monit_url,
+									$monit_uri_xml,
+									$monit_url_ssl = true,
+									$monit_http_username = "",
+									$monit_http_password = "",
+									$verify_ssl = true,
+									$chunk_size = 0,
+									$number_of_chunks = 0){
 			$found_settings = $ssl_on = $http_login = false;
 
-			$xml=self::getSettings();
+			if(!($server_id = self::isServerIDValid($server_id))) exit("Server ID invalid");
+
+			$xml=self::getSettings($server_id);
 			if($xml!=false) $found_settings = true; // Do we already have the settings file saved or is this fresh version?
 			if($monit_url_ssl) $ssl_on = true; // Setting ssl true
 			if(strlen($monit_http_username)>0) $http_login = true; // If username are used, http login has to be done
@@ -124,9 +155,10 @@
 				libxml_use_internal_errors(true);
 				if($xml = simplexml_load_string($data)){
 					if(isset($xml->server)){
-						if(self::putSettings($xml->server)){
+						if(self::putSettings($server_id, $xml->server)){
+							$monit_id = $xml->server->id;
 							foreach($xml->service as $service){
-								self::writeServiceHistoric($service,$service["type"],$chunk_size,$number_of_chunks);
+								self::writeServiceHistoric($monit_id, $service,$service["type"],$chunk_size,$number_of_chunks);
 							}
 						}
 					}
@@ -141,10 +173,10 @@
 		/**
 		 * Return false or the simplexml object depending if the settings file exists
 		*/
-		public static function getSettings(){
-			if(!self::settingsWriteable()) exit("Cannot write settings");
-			$filename = dirname(__FILE__)."/".self::data_path.self::server_xml_file_name;
-			if($filename){
+		public static function getSettings($server_id){
+			if(!self::settingsWriteable($server_id)) exit("Cannot write settings");
+			$filename = dirname(__FILE__)."/".self::data_path.$server_id."-".self::server_xml_file_name;
+			if(file_exists($filename)){
 				return simplexml_load_string(file_get_contents($filename));
 			}
 			return false;
@@ -153,10 +185,11 @@
 		/**
 		 * Save the settings file from simplexml object to DOM
 		*/
-		public static function putSettings($xml){
-			if(!self::settingsWriteable()) exit("Cannot write settings");
-			$filename = dirname(__FILE__)."/".self::data_path.self::server_xml_file_name;
+		public static function putSettings($server_id, $xml){
+			if(!self::settingsWriteable($server_id)) exit("Cannot write settings");
+			$filename = dirname(__FILE__)."/".self::data_path.$server_id."-".self::server_xml_file_name;
 			if(!$handle=fopen($filename, 'w')){
+				error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Cannot open $filename");
 				exit("Cannot open $filename");
 			}
 			$dom_xml = dom_import_simplexml($xml);
@@ -168,6 +201,7 @@
 			$dom->formatOutput = false;
 			if (fwrite($handle, $dom->saveXML()) === FALSE) {
 				fclose($handle);
+				error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Cannot write to $filename");
 				exit("Cannot write to $filename");
 			}
 			fclose($handle);
@@ -183,18 +217,6 @@
 			if(!is_writeable($dirpath)){
 				error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": ".$dirpath." is not write-able!");
 				return false;
-			}else{
-				/* Checking logs directory */
-				if(!is_dir($dirpath."/logs/"))
-					if(!mkdir($dirpath."/logs/")){
-						error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": ".$dirpath."/logs/"." could not be created!");
-						return false;
-					}
-				else
-					if(!is_writeable($dirpath."/logs/")){
-						error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": ".$dirpath."/logs/"." is not write-able!");
-						return false;
-					}
 			}
 			return true;
 		}
@@ -202,9 +224,9 @@
 		/**
 		 * Return true or false if the settings file is writeable
 		*/
-		public static function settingsWriteable(){
+		public static function settingsWriteable($server_id){
 			if(!self::datapathWriteable()) return false;
-			$filename = dirname(__FILE__)."/".self::data_path.self::server_xml_file_name;
+			$filename = dirname(__FILE__)."/".self::data_path.$server_id."-".self::server_xml_file_name;
 			if(file_exists($filename) && !is_writeable($filename)){
 				error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": ".$filename." is not write-able!");
 				return false;
@@ -215,7 +237,7 @@
 		/**
 		 * Will write the XML history file for a specific service. Inputs simplexml object and service type
 		*/
-		public static function writeServiceHistoric($xml, $type, $chunk_size = 0, $number_of_chunks = 0){
+		public static function writeServiceHistoric($monit_id, $xml, $type, $chunk_size = 0, $number_of_chunks = 0){
 			if($type=="3" || $type=="5"){ // Only services
 				$name = $xml->name;
 				if(!self::datapathWriteable()) exit("Cannot write in data path");
@@ -274,7 +296,11 @@
 				$service->appendChild($new_service);
 
 				$dom->validate();
-				$filename = dirname(__FILE__)."/".self::data_path."/logs/".$name.".xml";
+				$dir = dirname(__FILE__)."/".self::data_path."/".$monit_id;
+				if(!is_dir($dir))
+					if(!mkdir($dir)) exit("Could not create data path $dir");
+
+				$filename = $dir."/".$name.".xml";
 				if(file_exists($filename)){
 
 					if(!self::rotateFiles($filename,$chunk_size,$number_of_chunks)) exit("Fatal error, could not rotate file $filename");
@@ -404,6 +430,125 @@
 
 			return $json;
 		}
+		
+		/**
+		 * Will return a Google Graph JSON string or false
+		*/
+		public static function getLastRecord($server_id){
+			$files = MonitGraph::getLogFilesForServerID($server_id);
+			if(!$files) return false;
+
+			/* Check the directory for the Monit instance ID */
+			$return_array = array();
+			foreach($files as $file){
+				if(!file_exists($file) or !$xml=simplexml_load_string(file_get_contents($file))){
+					error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": $filename could not be loaded!");
+					return false;
+				}
+				$return_array[]=array(
+									"name"=>$xml['name'],
+									"time"=>intVal($xml->record[0]['time']),
+									"memory"=>$xml->record[0]->memory,
+									"cpu"=>$xml->record[0]->cpu,
+									"swap"=>@$xml->record[0]->swap,
+									"status"=>$xml->record[0]->status);
+			}
+			return $return_array;
+		}
+		
+		
+		/**
+		 * Function to return XML of the server id 
+		*/
+		public static function getInformationServerID($server_id){
+			/* First retrieve the server configuration */
+			$server_file = "data/".$server_id."-server.xml";
+			if(!file_exists($server_file) or !$server_xml=simplexml_load_string(file_get_contents($server_file))){
+				error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": $server_file could not be loaded!");
+				return false;
+			}
+			return $server_xml;
+		}
+
+		/**
+		 * Function to return list of log files for the server id and optional for a specific service
+		*/
+		public static function getLogFilesForServerID($server_id, $specific_services = ""){
+			$monit_id = self::getMonitIDFromServerID($server_id); // Retrieve the Monit ID
+			if(!$monit_id) return false;
+
+			/* Check the directory for the Monit instance ID */
+			$files = array();
+			foreach(glob("data/".$monit_id."/".$specific_services."*.xml") as $file){
+				$files[] = $file;
+			}
+			return $files;
+		}
+
+		/**
+		 * Function to return the actual unique identifier from a server id in the configuration file
+		*/
+		public static function getMonitIDFromServerID($server_id){
+			/* First retrieve the server configuration */
+			$server_file = "data/".$server_id."-server.xml";
+			if(!file_exists($server_file) or !$server_xml=simplexml_load_string(file_get_contents($server_file))){
+				error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": $server_file could not be loaded!");
+				return false;
+			}
+
+			/* Check Monit instance ID */
+			$monit_id = $server_xml->id; // Retrieve the Monit ID
+			if(strlen($monit_id)<1){
+				error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Monit id for $server_file is too small");
+				return false;
+			}
+
+			return $monit_id;
+		}
+		
+		/**
+		 * Function to delete all datafiles bound to a server id and optionally to a filename
+		*/
+		public static function deleteDataFiles($server_id, $xml_file_name = false){
+			$monit_id = self::getMonitIDFromServerID($server_id);
+			if(!$monit_id) return false;
+
+			if(strlen($xml_file_name)<0){
+				// We are deleting everything to this server id
+				
+				// First everything in the data directory
+				$dirname = "data/".$monit_id."/";
+				foreach(glob($dirname."*") as $file){
+					if(!unlink($file)){
+						error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Could not delete $file");
+						return false;
+					}
+				}
+
+				// Now the data directory itself
+				if(!unlink($dirname)){
+					error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Could not delete $dirname");
+					return false;
+				}
+
+				// Now the server file
+				$server_file = "data/".$server_id."-server.xml";
+				if(!unlink($server_file)){
+					error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Could not delete $server_file");
+					return false;
+				}
+			}else{
+				// Only delete specific data file
+				foreach(glob("data/".$monit_id."/".$xml_file_name."*") as $file){
+					if(!unlink($file)){
+						error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Could not delete $file");
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+
 
 		/**
 		 * A file rotator function, will rotate specific filename depending on size and limitation
@@ -471,6 +616,16 @@
 			}
 			return $ret;
 		}
+		
+		/**
+		 * Return true/false if server id is valid
+		*/
+		public static function isServerIDValid($server_id){
+			if(strlen($server_id)>0 && is_int($server_id)) return intVal($server_id);
+			error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Server ID is not valid $server_id!");
+			return false;
+		}
+
 	}
  
  ?>

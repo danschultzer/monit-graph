@@ -32,13 +32,38 @@
  * @copyright Dan Schultzer
  */
 
-	/* Monit login information */ 
-	$monit_url = ""; // E.g. yourdomain.com:2934
-	$monit_uri_xml = "_status?format=xml"; // No need to edit
-	$monit_url_ssl = true; // If you wish SSL encryption, turn on. The monit_url need to accept requests on :443 then!
-	$monit_http_username = ""; // Username to login at monit http
-	$monit_http_password = ""; // Password to login at monit http
-	$verify_ssl = false; // Set to true in production. This verifies that the SSL certificate is good.
+	/* Monit login information */
+	$server_configs = array(
+				array(
+						"name"=>"My Server 1",
+						"server_id"=>1, 										// server_id HAS to be unique always
+						"config"=>
+						array(
+							"url" => "", 											// E.g. yourdomain.com:2934
+							"uri_xml" => "_status?format=xml", 	// No need to edit
+							"url_ssl" => true, 									// If you wish SSL encryption, turn on. The monit_url need to accept requests on :443 then!
+							"http_username" => "", 						// Username to login at monit http
+							"http_password" => "", 						// Password to login at monit http
+							"verify_ssl" => false 								// Set to true in production. This verifies that the SSL certificate is good.
+						)
+					)
+/*
+					,
+				array(
+						"name"=>"My Server 2",
+						"server_id"=>2, 										// server_id HAS to be unique always
+						"config"=>
+						array(
+							"url" => "", 											// E.g. yourdomain.com:2934
+							"uri_xml" => "_status?format=xml", 	// No need to edit
+							"url_ssl" => true, 									// If you wish SSL encryption, turn on. The monit_url need to accept requests on :443 then!
+							"http_username" => "", 						// Username to login at monit http
+							"http_password" => "", 						// Password to login at monit http
+							"verify_ssl" => false 								// Set to true in production. This verifies that the SSL certificate is good.
+						)
+					)
+*/
+				);
 
 	/* Monit-Graph display information */
 	$default_time_range = 3600; // Amount in seconds of the default view should be (0 equals all available data)
