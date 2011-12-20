@@ -89,7 +89,7 @@
 		/* If to show alerts */
 		if(isset($_GET['dont_show_alerts']) && $_GET['dont_show_alerts']=="on"){
 			$dont_show_alerts = "on";
-		}else{
+		}elseif(!isset($_GET['chart_type'])){
 			$dont_show_alerts = $default_dont_show_alerts;
 		}
 		if($dont_show_alerts=="on"){
