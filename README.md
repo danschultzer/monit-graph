@@ -3,18 +3,19 @@
 Monit Graph is a logging and graphing tool for Monit written in PHP5. It can manage big amounts of data, and will keep a history of Monit statuses.
 
 ####Features
-* Easy to customize
+* Easy to manage and customize
 * Several different graphs (Google Charts) of memory, cpu, swap and alert activity
 * Data logging with XML files
 * Chunk rotation and size limitation
+* Multiple server setup
 
 
 ##Get started
 
 To get started, you will first need to have Monit installed and enabled with HTTP access. You can read more under "Setting up Monit".
 
-1. Change permissions for data and data/logs directory to 777.
-2. Change permissions for data/index.php and data/logs/index.php to 644.
+1. Change permissions for data directory to 777.
+2. Change permissions for data/index.php to 644.
 3. Modify config.php to match your setup of monit as well as needs of graphing.
 4. Setup a crontab job to run cron.php every minute. Example:
     \* * * * * php /path/to/monit/cron.php >>/var/log/monit-graph.log
@@ -44,12 +45,12 @@ Make sure the following parameters are set correctly (these are examples, adjust
     set mailserver localhost
     set mail-format { from: monit@mydomain.com }
 
-    set alert myemail@myemaildomain.com							# receive all alerts
-    set httpd port 2934 and use the address XX.XX.XX.XX			# Remove "and use the address XX.XX.XX.XX", if not bind to specific IP
-    	ssl enable											# Enabling SSL
-    	pemfile /etc/ssl/monit.pem							# The PEM file
-    	signature disable									# No server signature to send
-    	allow mylogin:"mypassword"							# Login
+    set alert myemail@myemaildomain.com								# receive all alerts
+    set httpd port 2812 and use the address XX.XX.XX.XX			# Remove "and use the address XX.XX.XX.XX", if not bind to specific IP
+    	ssl enable																			# Enabling SSL
+    	pemfile /etc/ssl/monit.pem												# The PEM file
+    	signature disable																# No server signature to send
+    	allow mylogin:"mypassword"												# Login
 
 Remember to allow httpd to run, or else Monit graph cannot contact you.
 
