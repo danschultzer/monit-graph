@@ -315,6 +315,7 @@
 					}
 				}
 				if(!$handle=fopen($filename, 'w')){
+					error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Cannot open $filename");
 					exit("Cannot open $filename");
 				}
 
@@ -322,6 +323,7 @@
 				$dom->formatOutput = false;
 				if (fwrite($handle, $dom->saveXML()) === FALSE) {
 					fclose($handle);
+					error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Cannot write to $filename");
 					exit("Cannot write to $filename");
 				}
 				fclose($handle);
