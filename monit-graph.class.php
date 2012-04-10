@@ -156,9 +156,8 @@
 				if($xml = simplexml_load_string($data)){
 					if(isset($xml->server)){
 						if(self::putSettings($server_id, $xml->server)){
-							$monit_id = $xml->server->id;
 							foreach($xml->service as $service){
-								self::writeServiceHistoric($monit_id, $service,$service["type"],$chunk_size,$number_of_chunks);
+								self::writeServiceHistoric($server_id, $service, $service["type"], $chunk_size, $number_of_chunks);
 							}
 						}
 					}
@@ -237,7 +236,7 @@
 		/**
 		 * Will write the XML history file for a specific service. Inputs simplexml object and service type
 		*/
-		public static function writeServiceHistoric($monit_id, $xml, $type, $chunk_size = 0, $number_of_chunks = 0){
+		public static function writeServiceHistoric($server_id, $xml, $type, $chunk_size = 0, $number_of_chunks = 0){
 			if($type=="3" || $type=="5"){ // Only services
 				$name = $xml->name;
 				if(!self::datapathWriteable()) exit("Cannot write in data path");
@@ -296,7 +295,7 @@
 				$service->appendChild($new_service);
 
 				$dom->validate();
-				$dir = dirname(__FILE__)."/".self::data_path."/".$monit_id;
+				$dir = dirname(__FILE__)."/".self::data_path."/".$server_id;
 				if(!is_dir($dir))
 					if(!mkdir($dir)) exit("Could not create data path $dir");
 
@@ -476,50 +475,23 @@
 		 * Function to return list of log files for the server id and optional for a specific service
 		*/
 		public static function getLogFilesForServerID($server_id, $specific_services = ""){
-			$monit_id = self::getMonitIDFromServerID($server_id); // Retrieve the Monit ID
-			if(!$monit_id) return false;
-
 			/* Check the directory for the Monit instance ID */
 			$files = array();
-			foreach(glob("data/".$monit_id."/".$specific_services."*.xml") as $file){
+			foreach(glob("data/".$server_id."/".$specific_services."*.xml") as $file){
 				$files[] = $file;
 			}
 			return $files;
-		}
-
-		/**
-		 * Function to return the actual unique identifier from a server id in the configuration file
-		*/
-		public static function getMonitIDFromServerID($server_id){
-			/* First retrieve the server configuration */
-			$server_file = "data/".$server_id."-server.xml";
-			if(!file_exists($server_file) or !$server_xml=simplexml_load_string(file_get_contents($server_file))){
-				error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": $server_file could not be loaded!");
-				return false;
-			}
-
-			/* Check Monit instance ID */
-			$monit_id = $server_xml->id; // Retrieve the Monit ID
-			if(strlen($monit_id)<1){
-				error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Monit id for $server_file is too small");
-				return false;
-			}
-
-			return $monit_id;
 		}
 		
 		/**
 		 * Function to delete all datafiles bound to a server id and optionally to a filename
 		*/
 		public static function deleteDataFiles($server_id, $xml_file_name = false){
-			$monit_id = self::getMonitIDFromServerID($server_id);
-			if(!$monit_id) return false;
-
 			if(strlen($xml_file_name)<0){
 				// We are deleting everything to this server id
 				
 				// First everything in the data directory
-				$dirname = "data/".$monit_id."/";
+				$dirname = "data/".$server_id."/";
 				foreach(glob($dirname."*") as $file){
 					if(!unlink($file)){
 						error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Could not delete $file");
@@ -541,7 +513,7 @@
 				}
 			}else{
 				// Only delete specific data file
-				foreach(glob("data/".$monit_id."/".$xml_file_name."*") as $file){
+				foreach(glob("data/".$server_id."/".$xml_file_name."*") as $file){
 					if(!unlink($file)){
 						error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Could not delete $file");
 						return false;
