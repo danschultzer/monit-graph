@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Monit-graph by dandreamconception</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Monit-graph</h1>
+        <p>PHP graphing and logging tool for Monit, to graph and analyse process and/or server performance.</p>
+
+        <p class="view"><a href="https://github.com/dandreamconception/monit-graph">View the Project on GitHub <small>dandreamconception/monit-graph</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/dandreamconception/monit-graph/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/dandreamconception/monit-graph/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/dandreamconception/monit-graph">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>Monit Graph</h1>
+
+<p>Monit Graph is a logging and graphing tool for Monit written in PHP5. It can manage big amounts of data, and will keep a history of Monit statuses.</p>
+
+<p><img src="http://dreamconception.com/wp-content/uploads/2012/06/monit-graph-overview1.png" alt="Monit Graph Overview Panel"></p>
+
+<p><img src="http://dreamconception.com/wp-content/uploads/2012/06/monit-graph-detail1.png" alt="Monit Graph Detail Panel"></p>
+
+<h4>Features</h4>
+
+<ul>
+<li>Easy to manage and customize</li>
+<li>Several different graphs (Google Charts) of memory, cpu, swap and alert activity</li>
+<li>Data logging with XML files</li>
+<li>Chunk rotation and size limitation</li>
+<li>Multiple server setup</li>
+</ul><h2>Get started</h2>
+
+<p>To get started, you will first need to have Monit installed and enabled with HTTP access. You can read more under "Setting up Monit".</p>
+
+<ol>
+<li>Change permissions for data directory to 777.</li>
+<li>Change permissions for data/index.php to 644.</li>
+<li>Modify config.php to match your setup of monit as well as needs of graphing.</li>
+<li>Setup a crontab job to run cron.php every minute. Example:
+* * * * * php /path/to/monit/cron.php &gt;&gt;/var/log/monit-graph.log</li>
+<li>Verify after a few minutes of running that the logging happens. You can check the php error log if there seams to be something wrong.</li>
+</ol><h2>Setting up Monit</h2>
+
+<p>To setup Monit on Ubuntu, please follow the below steps.</p>
+
+<h4>Install Monit</h4>
+
+<pre><code># sudo apt-get update
+# sudo apt-get install monit
+</code></pre>
+
+<h4>Edit configuration file for Monit</h4>
+
+<pre><code># sudo vi /etc/monit/monitrc
+</code></pre>
+
+<p>Make sure the following parameters are set correctly (these are examples, adjust accordingly):</p>
+
+<pre><code>set idfile /var/run/monit-id
+set statefile /var/run/monit-state
+set daemon 60
+set logfile /var/log/monit.log
+
+set mailserver localhost
+set mail-format { from: monit@mydomain.com }
+
+set alert myemail@myemaildomain.com                             # receive all alerts
+set httpd port 2812 and use the address XX.XX.XX.XX         # Remove "and use the address XX.XX.XX.XX", if not bind to specific IP
+    ssl enable                                                                          # Enabling SSL
+    pemfile /etc/ssl/monit.pem                                              # The PEM file
+    signature disable                                                               # No server signature to send
+    allow mylogin:"mypassword"                                              # Login
+</code></pre>
+
+<p>Remember to allow httpd to run, or else Monit graph cannot contact you.</p>
+
+<h4>Add services to Monit</h4>
+
+<p>Add a few configuration files into the /etc/monit/conf.d/ directory. You can use the examples from the monitrc directory.</p>
+
+<p>Check if the configuration are good:</p>
+
+<pre><code># monit -t
+</code></pre>
+
+<h4>Restart Monit with the new configuration</h4>
+
+<p>Restart</p>
+
+<pre><code># service monit restart
+</code></pre>
+
+<h2>Tips</h2>
+
+<ol>
+<li><p>If the script have trouble managing big amounts of data, try increase the allowed allocated memory in a .htaccess</p></li>
+<li><p>REMEMBER to password protect the directory with .htaccess or anything appropriate</p></li>
+<li><p>Loading many services can be very heavy for your browser, try specify the services you wish be shown.</p></li>
+<li><p>For added security, remove the tools directory</p></li>
+</ol><h2>Links</h2>
+
+<p><a href="http://dreamconception.com/tools/measure-your-server-performance-with-monit-and-monit-graph/">Blog post about Monit and Monit-Graph</a></p>
+
+<p><a href="http://mmonit.com/monit/">Official Monit Website</a></p>
+
+<h2>About</h2>
+
+<p>Dan Schultzer works at Dream Conception (<a href="http://dreamconception.com/">http://dreamconception.com/</a>) and Abcel (<a href="http://abcel-online.com">http://abcel-online.com</a>). This script was developed to increase the usability of Monit.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/dandreamconception">dandreamconception</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
