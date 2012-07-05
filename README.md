@@ -2,6 +2,10 @@
 
 Monit Graph is a logging and graphing tool for Monit written in PHP5. It can manage big amounts of data, and will keep a history of Monit statuses.
 
+![Monit Graph Overview Panel](http://dreamconception.com/wp-content/uploads/2012/06/monit-graph-overview1.png)
+
+![Monit Graph Detail Panel](http://dreamconception.com/wp-content/uploads/2012/06/monit-graph-detail1.png)
+
 ####Features
 * Easy to manage and customize
 * Several different graphs (Google Charts) of memory, cpu, swap and alert activity
@@ -80,7 +84,9 @@ Restart
 4. For added security, remove the tools directory
 
 ##Links
-http://mmonit.com/monit/
+[Blog post about Monit and Monit-Graph](http://dreamconception.com/tools/measure-your-server-performance-with-monit-and-monit-graph/)
+
+[Official Monit Website](http://mmonit.com/monit/)
 
 
 ##About
