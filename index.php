@@ -58,10 +58,10 @@
 		else $package = "corechart";
 		$_SELECTED[$chart_type]=' selected="selected"';
 		$output_head .= '
-		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 		<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 		<script type="text/javascript">
-			google.load("visualization", "1", {packages: ["'.$package.'"]});
+			google.load("visualization", "1.1", {packages: ["'.$package.'"]});
 		</script>';
 	
 	
@@ -117,52 +117,54 @@
 			var chart$i = null;
 	
 			function drawVisualization$i() {
-				var jsonData = $.ajax({
+				$.ajax({
 									type: "GET",
 									url: "getdata.php",
 									data: {
 										"file": "$file",
 										"time_range": "$time_range"
 									},
-									dataType:"json",
-									async: false
-								}).responseText;
-				var evalledData = eval("("+jsonData+")");
-				if('$chart_type'=='Gauge'){
-					evalledData.rows.splice(1,evalledData.rows.length);
-				}
-				if("on"=="$dont_show_alerts"){
-					if(evalledData["cols"][3]["label"]=="Alerts"){
-						for(i = 0; i < evalledData.rows.length; i++){
-							evalledData.rows[i].c[3].v=null;
-						}
-					}
-					if(typeof evalledData["cols"][4] != "undefined" && evalledData["cols"][4]["label"]=="Alerts"){
-						for(i = 0; i < evalledData.rows.length; i++){
-							evalledData.rows[i].c[4].v=null;
-						}
-					}
-				}
+									async: true,
+									cache: false,
+								}).done(function(data){
+									var evalledData = eval("("+data+")");
+									if (typeof evalledData != "object") return;
+									if('$chart_type'=='Gauge'){
+										evalledData.rows.splice(1,evalledData.rows.length);
+									}
+									if("on"=="$dont_show_alerts"){
+										if(evalledData["cols"][3]["label"]=="Alerts"){
+											for(i = 0; i < evalledData.rows.length; i++){
+												evalledData.rows[i].c[3].v=null;
+											}
+										}
+										if(typeof evalledData["cols"][4] != "undefined" && evalledData["cols"][4]["label"]=="Alerts"){
+											for(i = 0; i < evalledData.rows.length; i++){
+												evalledData.rows[i].c[4].v=null;
+											}
+										}
+									}
 	
-				if(data$i==null){
-					data$i = new google.visualization.DataTable(evalledData);
-				}else{
-					data$i.removeRows(0,data$i.getNumberOfRows());
-					for(i = 0; i < evalledData.rows.length; i++){
-						data$i.addRow(evalledData.rows[i].c);
-					}
-				}
-				delete evalledData;
+									if(data$i==null){
+										data$i = new google.visualization.DataTable(evalledData);
+									}else{
+										data$i.removeRows(0,data$i.getNumberOfRows());
+										for(i = 0; i < evalledData.rows.length; i++){
+											data$i.addRow(evalledData.rows[i].c);
+										}
+									}
+									delete evalledData;
 	
-				if(chart$i==null) chart$i = new google.visualization.$chart_type(document.getElementById('chart_div$i'));
-				chart$i.draw(data$i, {
-										title : '$filename',
-										vAxis: {title: "Usage in %", minValue: 0},
-										hAxis: {title: "Time"}
-									});
-				if($refresh_seconds>0){
-					var timeout = setTimeout("drawVisualization$i()",$refresh_miliseconds);
-				}
+									if(chart$i==null) chart$i = new google.visualization.$chart_type(document.getElementById('chart_div$i'));
+									chart$i.draw(data$i, {
+															title : '$filename',
+															vAxis: {title: "Usage in %", minValue: 0},
+															hAxis: {title: "Time"}
+														});
+									if($refresh_seconds>0){
+										var timeout = setTimeout("drawVisualization$i()",$refresh_miliseconds);
+									}
+								});
 			}
 			google.setOnLoadCallback(drawVisualization$i);
 		</script>
