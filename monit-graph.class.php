@@ -578,7 +578,7 @@
 		/**
 		 * A function to convert php.ini notation for numbers to integer (e.g. '25M')
 		*/
-		function let_to_num($v){
+		public static function let_to_num($v){
 			$l = substr($v, -1);
 			$ret = substr($v, 0, -1);
 			switch(strtoupper($l)){
