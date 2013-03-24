@@ -261,7 +261,11 @@
 					$memory = $dom->createElement("memory",$xml->system->memory->percent);
 					$new_service->appendChild($memory);
 
-					$cpu = $dom->createElement("cpu",(float)$xml->system->cpu->user+(float)$xml->cpu->system+(float)$xml->cpu->wait);
+					$cpu_user = (float) $xml->system->cpu->user;
+					$cpu_system = (float) $xml->system->cpu->system;
+					$cpu_wait = (float) $xml->system->cpu->wait;
+					$total_cpu = $cpu_user + $cpu_system + $cpu_wait;
+					$cpu = $dom->createElement("cpu",$total_cpu);
 					$new_service->appendChild($cpu);
 
 					$swap = $dom->createElement("swap",$xml->system->swap->percent);
