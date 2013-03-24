@@ -257,7 +257,7 @@
 				$time->value = $xml->collected_sec;
 				$new_service->appendChild($time);
 
-				if($type=="5"){
+				if($type=="5"){ // System
 					$memory = $dom->createElement("memory",$xml->system->memory->percent);
 					$new_service->appendChild($memory);
 
@@ -266,11 +266,11 @@
 
 					$swap = $dom->createElement("swap",$xml->system->swap->percent);
 					$new_service->appendChild($swap);
-				}else{
-					$memory = $dom->createElement("memory",$xml->memory->percent);
+				}else{ // Process
+					$memory = $dom->createElement("memory",self::getMonitPercentage($xml->memory));
 					$new_service->appendChild($memory);
 
-					$cpu = $dom->createElement("cpu",$xml->cpu->percent);
+					$cpu = $dom->createElement("cpu",self::getMonitPercentage($xml->cpu));
 					$new_service->appendChild($cpu);
 
 					$pid = $dom->createElement("pid",$xml->pid);
@@ -598,6 +598,14 @@
 			if(strlen($server_id)>0 && is_int($server_id)) return intVal($server_id);
 			error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Server ID is not valid $server_id!");
 			return false;
+		}
+
+		/**
+		 * Return the real percentage usage
+		*/
+		public static function getMonitPercentage($xml){
+			if (isset($xml->percenttotal)) return $xml->percenttotal;
+			else return $xml->percent;
 		}
 
 	}
