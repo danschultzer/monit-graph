@@ -4,7 +4,7 @@
  *
  * Copyright (c) 2011, Dan Schultzer <http://abcel-online.com/>
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -15,7 +15,7 @@
  *     * Neither the name of the Dan Schultzer nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -36,11 +36,11 @@
 	require_once($current_dirname."monit-graph.class.php");
 
 	if(!MonitGraph::checkConfig($server_configs)) die("Fatal error. Check the error log please."); // If configs are not good we quit
-	
+
 	ob_start(); // Starting buffering
-	
+
 	$output_head = ""; // Output for header
-	
+
 	/* Show individuel server stats */
 	if(isset($_GET['server_id']) && strlen($_GET['server_id'])>0){
 
@@ -52,7 +52,7 @@
 		/* Chart Type */
 		if(isset($_GET['chart_type'])) $chart_type = $_GET['chart_type'];
 		else $chart_type = $default_chart_type;
-	
+
 		if($chart_type=='AnnotatedTimeLine') $package = "annotatedtimeline";
 		elseif($chart_type=='Gauge') $package = "gauge";
 		else $package = "corechart";
@@ -63,8 +63,8 @@
 		<script type="text/javascript">
 			google.load("visualization", "1.1", {packages: ["'.$package.'"]});
 		</script>';
-	
-	
+
+
 		/* Time Range */
 		if(isset($_GET['time_range'])){
 			$time_range = intVal($_GET['time_range']);
@@ -73,19 +73,19 @@
 			$time_range = $default_time_range;
 			$_SELECTED[$time_range]=' selected="selected"';
 		}
-	
-	
+
+
 		/* Refresh data time */
 		if(isset($_GET['refresh_seconds'])) $refresh_seconds = intVal($_GET['refresh_seconds']);
 		else $refresh_seconds = $default_refresh_seconds;
 		$refresh_miliseconds = intVal($refresh_seconds)*1000;
-	
-	
+
+
 		/* Specific services */
 		if(isset($_GET['specific_services'])) $specific_services = (string)$_GET['specific_services'];
 		else $specific_services = $default_specific_service;
-	
-	
+
+
 		/* If to show alerts */
 		if(isset($_GET['dont_show_alerts']) && $_GET['dont_show_alerts']=="on"){
 			$dont_show_alerts = "on";
@@ -95,8 +95,8 @@
 		if($dont_show_alerts=="on"){
 			$_SELECTED['dont_show_alerts']=' checked="checked"';
 		}
-	
-	
+
+
 		/* Iterate all json files in data directory */
 		$i = 0;
 		$files = MonitGraph::getLogFilesForServerID($_GET['server_id'],$specific_services);
@@ -109,13 +109,13 @@
 		echo '<a href="?">Back to dashboard</a>';
 		foreach($files as $file){
 			$filename = basename($file);
-	
+
 			/* The javascript has some logic to parse the JSON, and to keep overhead down */
 			$output_head .= <<<EOF
 		<script type="text/javascript">
 			var data$i = null;
 			var chart$i = null;
-	
+
 			function drawVisualization$i() {
 				$.ajax({
 									type: "GET",
@@ -133,18 +133,15 @@
 										evalledData.rows.splice(1,evalledData.rows.length);
 									}
 									if("on"=="$dont_show_alerts"){
-										if(evalledData["cols"][3]["label"]=="Alerts"){
-											for(i = 0; i < evalledData.rows.length; i++){
-												evalledData.rows[i].c[3].v=null;
-											}
-										}
-										if(typeof evalledData["cols"][4] != "undefined" && evalledData["cols"][4]["label"]=="Alerts"){
-											for(i = 0; i < evalledData.rows.length; i++){
-												evalledData.rows[i].c[4].v=null;
+										for( i = 0; i < evalledData["cols"].length; i++ ) {
+											if ( evalledData["cols"][i]["label"] == "Alerts" ) {
+												for( j = 0; j < evalledData.rows.length; j++ ) {
+													evalledData.rows[j].c[i].v = null;
+												}
 											}
 										}
 									}
-	
+
 									if(data$i==null){
 										data$i = new google.visualization.DataTable(evalledData);
 									}else{
@@ -154,7 +151,7 @@
 										}
 									}
 									delete evalledData;
-	
+
 									if(chart$i==null) chart$i = new google.visualization.$chart_type(document.getElementById('chart_div$i'));
 									chart$i.draw(data$i, {
 															title : '$filename',
@@ -179,7 +176,7 @@ EOF;
 EOF;
 			$i++;
 		}
-	
+
 		echo '
 	<div class="form_box bordered_box">
 		<h2><a href="#" onclick="javascript:$(\'#view_form\').toggle(\'fast\');return false;">Change View</a></h2>
@@ -303,13 +300,13 @@ EOF;
 
 	}
 
-	$content = ob_get_contents();	
+	$content = ob_get_contents();
 	ob_end_clean();
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/> 
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 	<title>Monit Graph</title>
 	<link rel="stylesheet" href="css/reset.css" />
 	<link rel="stylesheet" href="css/style.css" />
@@ -326,7 +323,7 @@ EOF;
 <?php
 	echo $output_head;
 ?>
-</head>	
+</head>
 <body>
 	<div class="logo"><h1>Monit Graph</h1></div>
 	<div class="clear"></div>
