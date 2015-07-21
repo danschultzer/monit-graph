@@ -276,10 +276,10 @@
 					$program_status = $dom->createElement( "program_status", $xml->program->status );
 					$new_service->appendChild($program_status);
 
-					// $program_output is unused in frontend at this moment,
-					// but it's better to collect it in XML.
-					$program_output = $dom->createElement( "program_output", $xml->program->output );
-					$new_service->appendChild($program_output);
+					// Uncomment those lines to get program output logged into XML,
+					// but keep in mind that it's not yet supported in front-end.
+					//  $program_output = $dom->createElement( "program_output", $xml->program->output );
+					//  $new_service->appendChild($program_output);
 
 				}else{ // Process
 					$memory = $dom->createElement("memory",self::getMonitPercentage($xml->memory));
