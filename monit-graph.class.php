@@ -4,7 +4,7 @@
  *
  * Copyright (c) 2011, Dan Schultzer <http://abcel-online.com/>
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -15,7 +15,7 @@
  *     * Neither the name of the Dan Schultzer nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -124,16 +124,16 @@
 			$ch = curl_init($url);
 
 			if($monit_url_ssl){
-				curl_setopt($ch, CURLOPT_SSLVERSION, 3); 
+				curl_setopt($ch, CURLOPT_SSLVERSION, 3);
 				curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 				if($verify_ssl) curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 				else curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 			}
-			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers); 
-			curl_setopt($ch, CURLOPT_HEADER, 0); 
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+			curl_setopt($ch, CURLOPT_HEADER, 0);
 			curl_setopt($ch, CURLOPT_USERAGENT, $user_agent);
-			curl_setopt($ch, CURLOPT_TIMEOUT, 20); 
-			curl_setopt($ch, CURLOPT_TIMEOUT_MS, 20000); 
+			curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+			curl_setopt($ch, CURLOPT_TIMEOUT_MS, 20000);
 			curl_setopt ($ch, CURLOPT_URL, $url);
 
 			curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1); // We want a return
@@ -238,7 +238,7 @@
 		 * Will write the XML history file for a specific service. Inputs simplexml object and service type
 		*/
 		public static function writeServiceHistoric($server_id, $xml, $type, $chunk_size = 0, $number_of_chunks = 0){
-			if($type=="3" || $type=="5"){ // Only services
+			if($type=="3" || $type=="5" || $type=="7"){ // Only services and programs
 				$name = $xml->name;
 				if(!self::datapathWriteable()) exit("Cannot write in data path");
 
@@ -271,6 +271,16 @@
 
 					$swap = $dom->createElement("swap",$xml->system->swap->percent);
 					$new_service->appendChild($swap);
+				} else if ( $type == "7" ) { // Program
+
+					$program_status = $dom->createElement( "program_status", $xml->program->status );
+					$new_service->appendChild($program_status);
+
+					// Uncomment those lines to get program output logged into XML,
+					// but keep in mind that it's not yet supported in front-end.
+					//  $program_output = $dom->createElement( "program_output", $xml->program->output );
+					//  $new_service->appendChild($program_output);
+
 				}else{ // Process
 					$memory = $dom->createElement("memory",self::getMonitPercentage($xml->memory));
 					$new_service->appendChild($memory);
@@ -353,6 +363,12 @@
 								array("label"=>"Swap","type"=>"number"),
 								array("label"=>"Alerts","type"=>"number")
 							);
+			} else if ( $xml["type"]=="7" ) {
+				$array["cols"]=array(
+								array("label"=>"Time","type"=>"datetime"),
+								array("label"=>"Status","type"=>"number"),
+								array("label"=>"Alerts","type"=>"number")
+							);
 			}else{
 				$array["cols"]=array(
 								array("label"=>"Time","type"=>"datetime"),
@@ -381,6 +397,12 @@
 								array("v"=>(float)$record->cpu),
 								array("v"=>(float)$record->memory),
 								array("v"=>(float)$record->swap),
+								array("v"=>(float)$record->alert*100)
+							);
+					} else if ( $xml["type"]=="7" ) {
+						$array["rows"][]["c"]=array(
+								array("v"=>"%%new Date(".(intVal($record['time'])*1000).")%%"),
+								array("v"=>(float)$record->program_status),
 								array("v"=>(float)$record->alert*100)
 							);
 					}else{
@@ -436,7 +458,7 @@
 
 			return $json;
 		}
-		
+
 		/**
 		 * Will return a Google Graph JSON string or false
 		*/
@@ -461,10 +483,10 @@
 			}
 			return $return_array;
 		}
-		
-		
+
+
 		/**
-		 * Function to return XML of the server id 
+		 * Function to return XML of the server id
 		*/
 		public static function getInformationServerID($server_id){
 			/* First retrieve the server configuration */
@@ -487,14 +509,14 @@
 			}
 			return $files;
 		}
-		
+
 		/**
 		 * Function to delete all datafiles bound to a server id and optionally to a filename
 		*/
 		public static function deleteDataFiles($server_id, $xml_file_name = false){
 			if(strlen($xml_file_name)<0){
 				// We are deleting everything to this server id
-				
+
 				// First everything in the data directory
 				$dirname = "data/".$server_id."/";
 				foreach(glob($dirname."*") as $file){
@@ -595,7 +617,7 @@
 			}
 			return $ret;
 		}
-		
+
 		/**
 		 * Return true/false if server id is valid
 		*/
@@ -614,5 +636,5 @@
 		}
 
 	}
- 
+
  ?>
