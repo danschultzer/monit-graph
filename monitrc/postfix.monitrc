@@ -1,1 +1,0 @@
-check process postfix with pidfile "/var/spool/postfix/pid/master.pid" 			# Change PID to actual post fix pid path

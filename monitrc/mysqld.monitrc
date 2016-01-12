@@ -1,2 +1,0 @@
-check process mysqld with pidfile "/var/lib/mysql/mysqld.pid"				# Change PID to actual MySQL pid path
-	if cpu > 90% for 2 cycles then alert
