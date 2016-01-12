@@ -32,11 +32,10 @@
  * @copyright Dan Schultzer
  */
 
-	$current_dirname = dirname(__FILE__)."/";
-
 	/* Running cron with config options */
-	require_once($current_dirname."config.php");
-	require_once($current_dirname."monit-graph.class.php");
+	$include_path = realpath(dirname(__FILE__));
+ 	require_once($include_path."/config/config.php");
+	require_once($include_path."monit-graph.class.php");
 
 	if(!MonitGraph::checkConfig($server_configs)) die();
 

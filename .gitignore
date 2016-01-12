@@ -1,7 +1,7 @@
 # Data files #
 ##############
-*.xml
-*.xml.*
+data/*.xml
+data/*/*.xml.*
 
 # OS generated files #
 ######################
@@ -9,3 +9,8 @@
 ehthumbs.db
 Icon?
 Thumbs.db
+
+# Config files #
+##############
+config/.htpasswd
+config/servers.ini

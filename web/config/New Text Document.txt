@@ -1,0 +1,9 @@
+[0]
+name                    = ""
+server_id               = 1
+config[url]             = ":2812"
+config[uri_xml]         = "_status?format=xml"
+config[url_ssl]         = false
+config[http_username]   = "admin"
+config[http_password]   = "monit"
+config[verify_ssl]      = false

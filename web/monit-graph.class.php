@@ -622,7 +622,7 @@
 		 * Return true/false if server id is valid
 		*/
 		public static function isServerIDValid($server_id){
-			if(strlen($server_id)>0 && is_int($server_id)) return intVal($server_id);
+			if(strlen($server_id)>0 && intval($server_id)) return intVal($server_id);
 			error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Server ID is not valid $server_id!");
 			return false;
 		}

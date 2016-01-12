@@ -32,7 +32,7 @@
  * @copyright Dan Schultzer
  */
 
-	$current_dirname = dirname(__FILE__)."/";
+	$include_path = realpath(dirname(__FILE__));
 
 	/* First all the query strings are validated and taken care of */
  	if(!isset($_GET['file'])) echo json_encode(array());
@@ -40,13 +40,13 @@
 	else $time_range = $_GET['time_range'];
 
 	$replace = array("../","data/");
-	$_GET['file'] = $current_dirname."data/".str_replace($replace,"",$_GET['file']);
+	$_GET['file'] = $include_path."data/".str_replace($replace,"",$_GET['file']);
 
 	if(!file_exists($_GET['file'])) echo json_encode(array());
 
 	/* Now let's print the actual JSON */
-	require_once($current_dirname."config.php");
-	require_once($current_dirname."monit-graph.class.php");
+ 	require_once($include_path."/config/config.php");
+	require_once("monit-graph.class.php");
 
 	MonitGraph::printFullGoogleGraphHistoric($_GET['file'], $time_range, $limit_records_shown);
 ?>
