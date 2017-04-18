@@ -1,4 +1,4 @@
-#Monit Graph
+# Monit Graph
 
 Monit Graph is a logging and graphing tool for Monit written in PHP5. It can manage big amounts of data, and will keep a history of Monit statuses.
 
@@ -6,7 +6,7 @@ Monit Graph is a logging and graphing tool for Monit written in PHP5. It can man
 
 ![Monit Graph Detail Panel](http://dreamconception.com/wp-content/uploads/2012/06/monit-graph-detail1.png)
 
-####Features
+#### Features
 * Easy to manage and customize
 * Several different graphs (Google Charts) of memory, cpu, swap and alert activity
 * Data logging with XML files
@@ -14,7 +14,7 @@ Monit Graph is a logging and graphing tool for Monit written in PHP5. It can man
 * Multiple server setup
 
 
-##Get started
+## Get started
 
 To get started, you will first need to have Monit installed and enabled with HTTP access. You can read more under "Setting up Monit".
 
@@ -26,7 +26,7 @@ To get started, you will first need to have Monit installed and enabled with HTT
 5. Verify after a few minutes of running that the logging happens. You can check the php error log if there seams to be something wrong.
 
 
-##Setting up Monit
+## Setting up Monit
 
 To setup Monit on Ubuntu, please follow the below steps.
 
@@ -73,7 +73,7 @@ Restart
     # service monit restart
 
 
-##Tips
+## Tips
 
 1. If the script have trouble managing big amounts of data, try increase the allowed allocated memory in a .htaccess
 
@@ -83,11 +83,11 @@ Restart
 
 4. For added security, remove the tools directory
 
-##Links
+## Links
 [Blog post about Monit and Monit-Graph](http://dreamconception.com/tools/measure-your-server-performance-with-monit-and-monit-graph/)
 
 [Official Monit Website](http://mmonit.com/monit/)
 
 
-##About
+## About
 Dan Schultzer works at Dream Conception (http://dreamconception.com/) and Abcel (http://abcel-online.com). This script was developed to increase the usability of Monit.
