@@ -1,11 +1,16 @@
-# Data files #
-##############
-*.xml
-*.xml.*
-
 # OS generated files #
 ######################
 .DS_Store*
 ehthumbs.db
 Icon?
 Thumbs.db
+
+# Config files #
+##############
+web/config/.htpasswd
+web/config/servers.ini
+
+# Data files #
+##############
+web/data/*.xml
+web/data/*/*.xml.*

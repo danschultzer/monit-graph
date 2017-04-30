@@ -1,0 +1,18 @@
+#
+# Monit control file
+#
+
+set daemon 60 # Poll every 60 seconds
+set logfile syslog facility log_daemon
+
+# Configure Email Alerts
+set mailserver localhost
+set alert root@localhost but not on { instance }
+
+# Configure Web Interface
+set httpd port 2812 and
+    use address localhost
+    allow localhost # Allow localhost to connect
+    allow admin:monit # Set default password
+
+include /etc/monit.d/*

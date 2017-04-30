@@ -31,9 +31,9 @@
  * @author Dan Schultzer <http://abcel-online.com/>
  * @copyright Dan Schultzer
  */
-	$current_dirname = dirname(__FILE__)."/";
- 	require_once($current_dirname."config.php");
-	require_once($current_dirname."monit-graph.class.php");
+	$include_path = realpath(dirname(__FILE__));
+ 	require_once($include_path."/config/config.php");
+	require_once("monit-graph.class.php");
 
 	if(!MonitGraph::checkConfig($server_configs)) die("Fatal error. Check the error log please."); // If configs are not good we quit
 
@@ -121,7 +121,7 @@
 									type: "GET",
 									url: "getdata.php",
 									data: {
-										"file": "$file",
+										"file": "../$file",
 										"time_range": "$time_range"
 									},
 									async: true,
@@ -285,14 +285,14 @@ EOF;
 					echo "<div>".$service['memory']."%</div>";
 					echo "<div>".$service['swap']."</div>";
 					echo "<div>".date("H:i:s d-m-Y",$service['time'])."</div>";
-					echo '<div><a href="?delete_data='.urlencode($service['name'].".xml").'&amp;id='.$config['server_id'].'">Delete service data</a></div>';
+					echo '<div><a class="btn" href="?delete_data='.urlencode($service['name'].".xml").'&amp;id='.$config['server_id'].'">Delete service data</a></div>';
 					echo '</div>';
 					echo '<div class="clear"></div>';
 				}
 				echo '
 		<div class="actions">
-			<a href="?server_id='.$config['server_id'].'">View all logs for '.$config['name'].'</a>
-			<a href="?delete_data=1&amp;id='.$config['server_id'].'">Delete all data for '.$config['name'].'</a>
+			<a class="btn" href="?server_id='.$config['server_id'].'">View all logs for '.$config['name'].'</a>
+			<a class="btn" href="?delete_data=1&amp;id='.$config['server_id'].'">Delete all data for '.$config['name'].'</a>
 		</div>
 	</div>';
 			}
@@ -307,6 +307,7 @@ EOF;
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<meta http-equiv="refresh" content="60">
 	<title>Monit Graph</title>
 	<link rel="stylesheet" href="css/reset.css" />
 	<link rel="stylesheet" href="css/style.css" />
