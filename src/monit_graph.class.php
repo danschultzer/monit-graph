@@ -64,9 +64,9 @@ class MonitGraph
     */
     public static function config()
     {
-				if (getenv("CONFIG_FILE")) {
-					$config = require(getenv("CONFIG_FILE"));
-				} else if (file_exists(__DIR__ . "/../config/config.php")) {
+        if (getenv("CONFIG_FILE")) {
+            $config = require(getenv("CONFIG_FILE"));
+        } elseif (file_exists(__DIR__ . "/../config/config.php")) {
             $config = require(__DIR__ . "/../config/config.php");
         } else {
             $config = require(__DIR__ . "/../config/config.default.php");
@@ -75,17 +75,17 @@ class MonitGraph
         return $config;
     }
 
-		/**
+        /**
      * Get data directory
     */
-		public static function dataDir()
-		{
-			if (isset(self::config()['data_dir'])) {
-				return self::config()['data_dir'] . "/";
-			}
+        public static function dataDir()
+        {
+            if (isset(self::config()['data_dir'])) {
+                return self::config()['data_dir'] . "/";
+            }
 
-			return self::data_path . "/";
-		}
+            return self::data_path . "/";
+        }
 
     /**
      * Testing the server configs
