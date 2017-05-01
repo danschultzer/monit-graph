@@ -2,7 +2,7 @@
 
 $body = "";
 foreach($config['server_configs'] as $server_config){
-  $services = MonitGraph::getLastRecord($server_config['server_id']);
+  $services = \MonitGraph\Base::getLastRecord($server_config['server_id']);
   if(!$services) die("No log files where found. Please run cron first.");
 
   $body .= '

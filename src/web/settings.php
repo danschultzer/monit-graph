@@ -1,7 +1,5 @@
 <?php
-require __DIR__ . '/../src/monit_graph.class.php';
-
-$config = MonitGraph::config();
+$config = \MonitGraph\Base::config();
 
 $default_config = [
   // Renderer settings

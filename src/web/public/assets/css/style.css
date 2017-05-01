@@ -1,18 +1,18 @@
 /* GENERAL */
 
 body {
-	font: 13px/1.5 'Helvetica Neue', Arial, 'Liberation Sans', FreeSans, sans-serif;
-	background-color: #fff;
-	padding:10px;
+    font: 13px/1.5 'Helvetica Neue', Arial, 'Liberation Sans', FreeSans, sans-serif;
+    background-color: #fff;
+    padding:10px;
 }
 
 a {
-	color:#5050a7;
-	text-decoration:none;
+    color:#5050a7;
+    text-decoration:none;
 }
 
 a:hover {
-	color:#8080e7;
+    color:#8080e7;
 }
 
 .clear{
@@ -20,72 +20,72 @@ a:hover {
 }
 
 .logo {
-	float:right;
+    float:right;
 }
 
 .bordered_box {
-	background-color:#fff;
-	border: 1px solid #d0d0d0;
-	margin-bottom:20px;
-	padding:10px;
+    background-color:#fff;
+    border: 1px solid #d0d0d0;
+    margin-bottom:20px;
+    padding:10px;
 }
 
 .bordered_box h2 {
-	font-size:18px;
+    font-size:18px;
 }
 
 .bordered_box h2 a {
-	text-decoration:none;
-	color:#000;
+    text-decoration:none;
+    color:#000;
 }
 
 .form_box {
-	overflow:visible;
+    overflow:visible;
 }
 
 .form_box .input_box {
-	float:left;
-	display:block;
-	margin-right:10px;
-	padding:5px;
-	border:1px solid #d0d0d0;
-	height:20px;
-	margin-bottom:5px;
+    float:left;
+    display:block;
+    margin-right:10px;
+    padding:5px;
+    border:1px solid #d0d0d0;
+    height:20px;
+    margin-bottom:5px;
 }
 
 .form_box input, .form_box select {
-	background-color:#fff;
-	border:1px solid #d0d0d0;
+    background-color:#fff;
+    border:1px solid #d0d0d0;
 }
 
 .form_box input:hover, .form_box select:hover {
-	background-color: #e0e0e0;
+    background-color: #e0e0e0;
 }
 
 .form_box label:hover, .form_box input:hover, .form_box select:hover {
-	cursor:pointer;
+    cursor:pointer;
 }
 
 .form_box .submit_box {
-	float:left;
+    float:left;
 }
 
 .form_box .submit {
-	background-color: #d0d0d0;
-	font-weight:bold;
-	height:30px;
+    background-color: #d0d0d0;
+    font-weight:bold;
+    height:30px;
 }
 .server_box .service_header div, .server_box .service_row div {
-	float:left;
-	width:250px;
+    float:left;
+    width:250px;
 }
 
 .server_box div strong {
-	display:block;
+    display:block;
 }
 
 .server_box .actions {
-	width:100%;
+    width:100%;
 }
 
 .btn {

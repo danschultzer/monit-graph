@@ -22,7 +22,7 @@ To get started, you will first need to have Monit installed with HTTP access ena
 2. Add `config/servers.ini` (you can use [`servers.template.ini`](config/servers.template.ini))
 3. Set up a crontab job to run cron every minute:
    ```cron
-   * * * * * cd /path/to/monit-graph && composer cron >> /var/log/monit-graph.log
+   * * * * * cd /path/to/monit-graph && php src/scripts/cron.php >> /var/log/monit-graph.log
    ```
 4. Start server:
    ```bash

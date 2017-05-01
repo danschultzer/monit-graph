@@ -38,7 +38,7 @@ if ($dont_show_alerts=="on") $selected_dont_show_alerts = ' checked="checked"';
 
 /* Iterate all json files in data directory */
 $i = 0;
-$files = MonitGraph::getLogFilesForServerID($server_id, $specific_services);
+$files = \MonitGraph\Base::getLogFilesForServerID($server_id, $specific_services);
 foreach($config['server_configs'] as $server_config) {
   if ($server_config['server_id'] == $server_id) {
     $body .= "<h1>".$server_config['name']." service logs</h1>";

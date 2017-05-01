@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Web;
+namespace MonitGraph\Tests\Web;
 
 use Slim\App;
 use Slim\Http\Request;
@@ -54,21 +54,21 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $response = new Response();
 
         // Use the application settings
-        $settings = require __DIR__ . '/../../web/settings.php';
+        $settings = require __DIR__ . '/../../src/web/settings.php';
 
         // Instantiate the application
         $app = new App($settings);
 
         // Set up dependencies
-        require __DIR__ . '/../../web/dependencies.php';
+        require __DIR__ . '/../../src/web/dependencies.php';
 
         // Register middleware
         if ($this->withMiddleware) {
-            require __DIR__ . '/../../web/middleware.php';
+            require __DIR__ . '/../../src/web/middleware.php';
         }
 
         // Register routes
-        require __DIR__ . '/../../web/routes.php';
+        require __DIR__ . '/../../src/web/routes.php';
 
         // Process the application
         $response = $app->process($request, $response);

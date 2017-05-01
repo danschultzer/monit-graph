@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Web;
+namespace MonitGraph\Tests\Web;
 
 class IndexTest extends TestCase
 {

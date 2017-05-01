@@ -5,7 +5,7 @@ $container = $app->getContainer();
 
 // view renderer
 $container['renderer'] = function ($c) {
-    $config = MonitGraph::config();
+    $config = \MonitGraph\Base::config();
     $settings = $c->get('settings')['renderer'];
     $renderer = new Slim\Views\PhpRenderer($settings['template_path']);
     $renderer->addAttribute('router', $c->get('router'));

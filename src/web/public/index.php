@@ -9,7 +9,7 @@ if (PHP_SAPI == 'cli-server') {
     }
 }
 
-require __DIR__ . '/../../vendor/autoload.php';
+require __DIR__ . '/../../../vendor/autoload.php';
 
 // Instantiate the app
 $settings = require __DIR__ . '/../settings.php';

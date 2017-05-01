@@ -1,7 +1,7 @@
 <?php
-  if (!file_exists(__DIR__ . "/servers.ini")) {
-      die("Please set config/servers.ini first");
-  }
+if (!file_exists(__DIR__ . "/servers.ini")) {
+    die("Please set config/servers.ini first");
+}
 
   return [
     /* Monit-Graph display information */
