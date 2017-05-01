@@ -1,0 +1,22 @@
+<?php
+foreach($config['server_configs'] as $server_config) {
+  if ($server_config['server_id'] == $server_id) {
+    $name = $server_config['name'];
+    break;
+  }
+}
+
+if($delete_data=="1") {
+    $txt = 'Are you sure to delete all files associated to the server '.$name.'?';
+} else {
+    $txt = 'Are you sure to delete all files associated to ' . $delete_data . ' at server '.$name.'?';
+}
+
+$yield = '<form action="' . $router->pathFor('confirm_delete_data', ['server_id' => $server_id]) . '" method="post">
+<input type="hidden" name="delete_data" value="' . $delete_data . '"/>
+<input type="hidden" name="_METHOD" value="DELETE"/>
+'.$txt.'
+<input type="submit" value="Delete" />
+</form>';
+
+require 'delete.phtml';

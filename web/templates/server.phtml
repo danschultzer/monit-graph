@@ -1,0 +1,168 @@
+<?php
+$body = "";
+$output_body = "";
+
+/* Chart Type */
+if (!$chart_type) $chart_type = $config['default_chart_type'];
+
+if ($chart_type == 'AnnotatedTimeLine') $package = "annotatedtimeline";
+elseif ($chart_type == 'Gauge') $package = "gauge";
+else $package = "corechart";
+
+$selected_chart_type[$chart_type]=' selected="selected"';
+
+$header = '
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+  google.charts.load("current", {"packages": ["' . $package . '"]});
+</script>';
+
+/* Time Range */
+if ($time_range === null) $time_range = $config['default_time_range'];
+$time_range = intVal($time_range);
+$selected_time_range[$time_range]=' selected="selected"';
+
+/* Refresh data time */
+if ($refresh_seconds === null) $refresh_seconds = $config['default_refresh_seconds'];
+$refresh_seconds = intVal($refresh_seconds);
+$refresh_miliseconds = $refresh_seconds * 1000;
+
+/* Specific services */
+if ($specific_services === null) $specific_services = $config['default_specific_service'];
+
+/* If to show alerts */
+if ($dont_show_alerts === null) $dont_show_alerts = $config['default_dont_show_alerts'];
+if ($dont_show_alerts=="on") $selected_dont_show_alerts = ' checked="checked"';
+
+
+/* Iterate all json files in data directory */
+$i = 0;
+$files = MonitGraph::getLogFilesForServerID($server_id, $specific_services);
+foreach($config['server_configs'] as $server_config) {
+  if ($server_config['server_id'] == $server_id) {
+    $body .= "<h1>".$server_config['name']." service logs</h1>";
+    break;
+  }
+}
+$body .= '<a href="' . $router->pathFor('root') . '">Back to dashboard</a>';
+$get_data_route = $router->pathFor('get_data', ['server_id' => $server_id]);
+foreach($files as $file) {
+  $filename = basename($file);
+
+  /* The javascript has some logic to parse the JSON, and to keep overhead down */
+  $header .= <<<EOF
+<script type="text/javascript">
+  var data$i = null;
+  var chart$i = null;
+
+  function drawVisualization$i() {
+    $.ajax({
+      type: "GET",
+      url: "$get_data_route",
+      data: {
+        "file": "$file",
+        "time_range": "$time_range"
+      },
+      async: true,
+      cache: false,
+    }).done(function(data){
+      data = JSON.stringify(data).replace(/('|\")%%/g, "").replace(/%%('|\")/g, "");
+      console.log(data);
+      var evalledData = eval("(" + data + ")");
+      if (typeof evalledData != "object") return;
+      if ('$chart_type'=='Gauge') evalledData.rows.splice(1,evalledData.rows.length);
+      if ("on" == "$dont_show_alerts") {
+        for( i = 0; i < evalledData["cols"].length; i++ ) {
+          if ( evalledData["cols"][i]["label"] == "Alerts" ) {
+            for( j = 0; j < evalledData.rows.length; j++ ) {
+              evalledData.rows[j].c[i].v = null;
+            }
+          }
+        }
+      }
+
+      if (data$i==null) {
+        data$i = new google.visualization.DataTable(evalledData);
+      } else {
+        data$i.removeRows(0,data$i.getNumberOfRows());
+
+        for (i = 0; i < evalledData.rows.length; i++) {
+          data$i.addRow(evalledData.rows[i].c);
+        }
+      }
+      delete evalledData;
+
+      if (chart$i == null) chart$i = new google.visualization.$chart_type(document.getElementById('chart_div$i'));
+      chart$i.draw(data$i, {
+        title : "$filename",
+        vAxis: {title: "Usage in %", minValue: 0},
+        hAxis: {title: "Time"}
+      });
+      if ($refresh_seconds>0) {
+        var timeout = setTimeout("drawVisualization$i()", $refresh_miliseconds);
+      }
+    }).fail(function (jqXHR, textStatus, errorThrown){ throw errorThrown;});
+  }
+  google.charts.setOnLoadCallback(drawVisualization$i);
+</script>
+EOF;
+  $output_body .= <<<EOF
+<div class="bordered_box">
+  <h2><a href="#" onclick="javascript:$('#chart_div$i').toggle('fast');return false;">$filename</a></h2>
+  <div id="chart_div$i" style="width: 800px; height: 400px; margin:20px;">
+    Loading Chart...
+  </div>
+</div>
+EOF;
+  $i++;
+}
+
+$body .= '
+<div class="form_box bordered_box">
+<h2><a href="#" onclick="javascript:$(\'#view_form\').toggle(\'fast\');return false;">Change View</a></h2>
+<form action="?" method="get" id="view_form">
+<input type="hidden" name="server_id" value="' . $server_id . '" />
+<div class="input_box">
+  <label><strong>Chart type:</strong>
+    <select name="chart_type">
+      <option value="LineChart"' . @$selected_chart_type['LineChart'] . '>Line Chart</option>
+      <option value="AreaChart"' . @$selected_chart_type['AreaChart'] . '>Area Chart</option>
+      <option value="Gauge"' . @$selected_chart_type['Gauge'] . '>Gauge</option>
+      <option value="AnnotatedTimeLine"' . @$selected_chart_type['AnnotatedTimeLine'] . '>Annotated Time Line</option>
+    </select>
+  </label>
+</div>
+<div class="input_box"><label><strong>Update Frequency:</strong> <input type="text" name="refresh_seconds" value="' . $refresh_seconds . '" size="4" /></label> seconds (don\'t go lower than update cycle of the monit instance)</div>
+<div class="input_box"><label><strong>Specific Service:</strong> <input type="text" name="specific_services" value="' . $specific_services . '" size="10" /></label></div>
+<div class="input_box">
+  <label><strong>Time Range:</strong>
+  <select name="time_range">
+    <option value="300"' . @$selected_time_range[300] . '>Last 5 minutes</option>
+    <option value="1200"' . @$selected_time_range[1200] . '>Last 20 minutes</option>
+    <option value="3600"' . @$selected_time_range[3600] . '>Last 1 hour</option>
+    <option value="7200"' . @$selected_time_range[7200] . '>Last 2 hours</option>
+    <option value="43200"' . @$selected_time_range[43200] . '>Last 12 hours</option>
+    <option value="86400"' . @$selected_time_range[86400] . '>Last 24 hours</option>
+    <option value="172800"' . @$selected_time_range[172800] . '>Last 2 days</option>
+    <option value="604800"' . @$selected_time_range[604800] . '>Last 7 days</option>
+    <option value="2419200"' . @$selected_time_range[2419200] . '>Last 30 days</option>
+    <option value="4838400"' . @$selected_time_range[4838400] . '>Last 60 days</option>
+    <option value="7257600"' . @$selected_time_range[7257600] . '>Last 120 days</option>
+    <option value="31536000"' . @$selected_time_range[31536000] . '>Last 365 days</option>
+    <option value="0"' . @$selected_time_range[0] . '>All</option>
+  </select>
+  </label>
+</div>
+<div class="input_box">
+  <label><strong>Hide Alerts:</strong> <input type="checkbox" name="dont_show_alerts" value="on"' . @$selected_dont_show_alerts . '></label>
+</div>
+<div class="submit_box">
+  <input type="submit" class="submit" value="Update View">
+</div>
+</form>
+<div class="clear"></div>
+</div>
+' . $output_body;
+
+require 'layout.phtml';

@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <meta http-equiv="refresh" content="60">
+  <title>Monit Graph</title>
+  <link rel="stylesheet" href="/assets/css/reset.css" />
+  <link rel="stylesheet" href="/assets/css/style.css" />
+
+  <script type="text/javascript">
+    function toggle_visibility(id) {
+      var e = document.getElementById(id);
+      if(e.style.display == "block")
+        e.style.display = "none";
+      else
+      e.style.display = "block";
+    }
+  </script>
+  <?php if (isset($header)) echo $header; ?>
+</head>
+<body>
+  <div class="logo"><h1>Monit Graph</h1></div>
+  <div class="clear"></div>
+  <?php echo $body; ?>
+</body>
+</html>

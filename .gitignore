@@ -7,10 +7,12 @@ Thumbs.db
 
 # Config files #
 ##############
-web/config/.htpasswd
-web/config/servers.ini
+config/.htpasswd
+config/servers.ini
 
 # Data files #
 ##############
-web/data/*.xml
-web/data/*/*.xml.*
+data/*.xml*
+data/*/*.xml*
+
+/vendor/

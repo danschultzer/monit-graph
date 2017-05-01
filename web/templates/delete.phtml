@@ -1,0 +1,10 @@
+<?php
+$body = "";
+$body .= '<a href="' . $router->pathFor('root') . '">Back to dashboard</a>';
+$body .= '<div class="server_box bordered_box">';
+$name = "";
+$body .= $yield;
+$body .= '
+</div>';
+
+require 'layout.phtml';

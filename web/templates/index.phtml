@@ -1,0 +1,47 @@
+<?php
+
+$body = "";
+foreach($config['server_configs'] as $server_config){
+  $services = MonitGraph::getLastRecord($server_config['server_id']);
+  if(!$services) die("No log files where found. Please run cron first.");
+
+  $body .= '
+<div class="server_box bordered_box">
+	<h2>'.$server_config['name'].' status</h2>';
+  if(empty($services)){
+    $body .= "<span>No log files found</span>";
+  }else{
+    $body .= '<div class="service_header">';
+    $body .= "<div><strong>Service:</strong></div>";
+    $body .= "<div><strong>CPU:</strong></div>";
+    $body .= "<div><strong>Memory:</strong></div>";
+    $body .= "<div><strong>Swap:</strong></div>";
+    $body .= "<div><strong>Last check:</strong></div>";
+    $body .= '<div><strong>Actions</strong></div>';
+    $body .= '</div>';
+    $body .= '<div class="clear"></div>';
+    foreach($services as $service){
+      if($service['status']==0) $status_color = "00FF00";
+      else $status_color = "FF0000";
+      if($service['swap']!="") $service['swap'].="%";
+      else $service['swap']="-";
+      $body .= '<div class="service_row">';
+      $body .= '<div><span style="color:#'.$status_color.'">●</span> <a href="' . $router->pathFor('server', ['server_id' => $server_config['server_id']], ['specific_services' => urlencode($service['name'])]) . '">'.$service['name']."</a></div>";
+      $body .= "<div>".$service['cpu']."%</div>";
+      $body .= "<div>".$service['memory']."%</div>";
+      $body .= "<div>".$service['swap']."</div>";
+      $body .= "<div>".date("H:i:s d-m-Y",$service['time'])."</div>";
+      $body .= '<div><a class="btn" href="' . $router->pathFor('delete_data', ['server_id' => $server_config['server_id']], ['delete_data' => urlencode($service['name'].".xml")]) . '">Delete service data</a></div>';
+      $body .= '</div>';
+      $body .= '<div class="clear"></div>';
+    }
+    $body .= '
+	<div class="actions">
+	  <a class="btn" href="' . $router->pathFor('server', ['server_id' => $server_config['server_id']]) . '">View all logs for '.$server_config['name'].'</a>
+	  <a class="btn" href="' . $router->pathFor('delete_data', ['server_id' => $server_config['server_id']]) . '">Delete all data for '.$server_config['name'].'</a>
+	</div>
+</div>';
+  }
+}
+
+require 'layout.phtml';
