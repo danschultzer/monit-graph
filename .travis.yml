@@ -1,5 +1,16 @@
+sudo: false
+
 language: php
+
 php:
-  - '5.6'
-  - '7.1'
-  - nightly
+  - 5.5
+  - 5.6
+  - 7.0
+  - 7.1
+  - hhvm
+
+before_script:
+  - composer install -n
+
+script:
+  - composer test
