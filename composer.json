@@ -27,7 +27,7 @@
     },
     "scripts": {
         "server": "php -S 0.0.0.0:8080 -t web/public web/public/index.php",
-        "test": "phpunit tests",
+        "test": "phpunit",
         "cron": "php src/cron.php",
         "build-massive-data": "php tests/utils/build_massive_data.php",
         "reverse-xml": "php src/reverse_xml.php"
