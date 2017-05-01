@@ -52,7 +52,7 @@ class MonitGraph
     /**
      * Path to data directory
     */
-    const data_path = __DIR__ . '/../data/';
+    const data_path = __DIR__ . '/../data';
 
     /**
      * Path to data directory
@@ -60,11 +60,13 @@ class MonitGraph
     const server_xml_file_name = 'server.xml';
 
     /**
-     * Testing the server configs
+     * Configs
     */
     public static function config()
     {
-        if (file_exists(__DIR__ . "/../config/config.php")) {
+				if (getenv("CONFIG_FILE")) {
+					$config = require(getenv("CONFIG_FILE"));
+				} else if (file_exists(__DIR__ . "/../config/config.php")) {
             $config = require(__DIR__ . "/../config/config.php");
         } else {
             $config = require(__DIR__ . "/../config/config.default.php");
@@ -72,6 +74,18 @@ class MonitGraph
 
         return $config;
     }
+
+		/**
+     * Get data directory
+    */
+		public static function dataDir()
+		{
+			if (isset(self::config()['data_dir'])) {
+				return self::config()['data_dir'] . "/";
+			}
+
+			return self::data_path . "/";
+		}
 
     /**
      * Testing the server configs
@@ -85,11 +99,11 @@ class MonitGraph
             $url[] = $config['config']['url'];
         }
         if (count($id) != count(array_unique($id))) {
-            error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": ID's in server config needs to be unique");
+            error_log("[" . self::identifier . "] " . __FILE__ . " line " . __LINE__ . ": ID's in server config needs to be unique");
             return false;
         }
         if (count($url) != count(array_unique($url))) {
-            error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": You should not use the same URL for individual servers");
+            error_log("[" . self::identifier . "] " . __FILE__ . " line " . __LINE__ . ": You should not use the same URL for individual servers");
             return false;
         }
         return true;
@@ -130,7 +144,7 @@ class MonitGraph
         if ($found_settings) {
             $time_difference = intval($xml->incarnation)+intval($xml->uptime)+intval($xml->poll)-20-time(); // 20 seconds connection time
             if ($time_difference>0) {
-                error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Poll time has not been reached (missing $time_difference seconds), waiting for one more cycle");
+                error_log("[" . self::identifier . "] " . __FILE__ . " line " . __LINE__ . ": Poll time has not been reached (missing $time_difference seconds), waiting for one more cycle");
                 return false;
             }
         }
@@ -145,7 +159,7 @@ class MonitGraph
             $url = "http://";
         }
 
-        $url .= $monit_url."/".$monit_uri_xml;
+        $url .= $monit_url . "/" . $monit_uri_xml;
         $ch = curl_init($url);
 
         if ($monit_url_ssl) {
@@ -168,7 +182,7 @@ class MonitGraph
 
         if ($http_login) {
             curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC) ;
-            curl_setopt($ch, CURLOPT_USERPWD, $monit_http_username.":".$monit_http_password) ;
+            curl_setopt($ch, CURLOPT_USERPWD, $monit_http_username . ":" . $monit_http_password) ;
         }
 
         $data = curl_exec($ch);
@@ -179,7 +193,7 @@ class MonitGraph
         curl_close($ch);
 
         if ($curl_errno > 0) {
-            error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": cURL Error ($curl_errno): $curl_error");
+            error_log("[" . self::identifier . "] " . __FILE__ . " line " . __LINE__ . ": cURL Error ($curl_errno): $curl_error");
         } else {
             libxml_use_internal_errors(true);
             if ($xml = simplexml_load_string($data)) {
@@ -192,7 +206,7 @@ class MonitGraph
                 }
             } else {
                 foreach (libxml_get_errors() as $error) {
-                    error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": ".$error->message);
+                    error_log("[" . self::identifier . "] " . __FILE__ . " line " . __LINE__ . ": " . $error->message);
                 }
             }
         }
@@ -206,7 +220,7 @@ class MonitGraph
         if (!self::settingsWriteable($server_id)) {
             exit("Cannot write settings");
         }
-        $filename = self::data_path.$server_id."-".self::server_xml_file_name;
+        $filename = self::dataDir() . $server_id . "-" . self::server_xml_file_name;
         if (file_exists($filename)) {
             return simplexml_load_string(file_get_contents($filename));
         }
@@ -221,9 +235,9 @@ class MonitGraph
         if (!self::settingsWriteable($server_id)) {
             exit("Cannot write settings");
         }
-        $filename = self::data_path.$server_id."-".self::server_xml_file_name;
+        $filename = self::dataDir() . $server_id . "-" . self::server_xml_file_name;
         if (!$handle=fopen($filename, 'w')) {
-            error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Cannot open $filename");
+            error_log("[" . self::identifier . "] " . __FILE__ . " line " . __LINE__ . ": Cannot open $filename");
             exit("Cannot open $filename");
         }
         $dom_xml = dom_import_simplexml($xml);
@@ -235,7 +249,7 @@ class MonitGraph
         $dom->formatOutput = false;
         if (fwrite($handle, $dom->saveXML()) === false) {
             fclose($handle);
-            error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Cannot write to $filename");
+            error_log("[" . self::identifier . "] " . __FILE__ . " line " . __LINE__ . ": Cannot write to $filename");
             exit("Cannot write to $filename");
         }
         fclose($handle);
@@ -248,8 +262,8 @@ class MonitGraph
     */
     public static function datapathWriteable()
     {
-        if (!is_writeable(self::data_path)) {
-            error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": ".self::data_path." is not write-able!");
+        if (!is_writeable(self::dataDir())) {
+            error_log("[" . self::identifier . "] " . __FILE__ . " line " . __LINE__ . ": " . self::dataDir() . " is not write-able!");
             return false;
         }
         return true;
@@ -263,9 +277,9 @@ class MonitGraph
         if (!self::datapathWriteable()) {
             return false;
         }
-        $filename = self::data_path.$server_id."-".self::server_xml_file_name;
+        $filename = self::dataDir() . $server_id . "-" . self::server_xml_file_name;
         if (file_exists($filename) && !is_writeable($filename)) {
-            error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": ".$filename." is not write-able!");
+            error_log("[" . self::identifier . "] " . __FILE__ . " line " . __LINE__ . ": " . $filename . " is not write-able!");
             return false;
         }
         return true;
@@ -349,14 +363,14 @@ class MonitGraph
             $service->appendChild($new_service);
 
             $dom->validate();
-            $dir = self::data_path."/".$server_id;
+            $dir = self::dataDir() . $server_id;
             if (!is_dir($dir)) {
                 if (!mkdir($dir)) {
                     exit("Could not create data path $dir");
                 }
             }
 
-            $filename = $dir."/".$name.".xml";
+            $filename = $dir . "/" . $name." . xml";
             if (file_exists($filename)) {
                 if (!self::rotateFiles($filename, $chunk_size, $number_of_chunks)) {
                     exit("Fatal error, could not rotate file $filename");
@@ -372,7 +386,7 @@ class MonitGraph
                 }
             }
             if (!$handle=fopen($filename, 'w')) {
-                error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Cannot open $filename");
+                error_log("[" . self::identifier . "] " . __FILE__ . " line " . __LINE__ . ": Cannot open $filename");
                 exit("Cannot open $filename");
             }
 
@@ -380,7 +394,7 @@ class MonitGraph
             $dom->formatOutput = false;
             if (fwrite($handle, $dom->saveXML()) === false) {
                 fclose($handle);
-                error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Cannot write to $filename");
+                error_log("[" . self::identifier . "] " . __FILE__ . " line " . __LINE__ . ": Cannot write to $filename");
                 exit("Cannot write to $filename");
             }
             fclose($handle);
@@ -394,7 +408,7 @@ class MonitGraph
     public static function returnGoogleGraphJSON($filename, $time_range, $limit_number_of_items = 0)
     {
         if (!file_exists($filename) or !$xml=simplexml_load_string(file_get_contents($filename))) {
-            error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": $filename could not be found!");
+            error_log("[" . self::identifier . "] " . __FILE__ . " line " . __LINE__ . ": $filename could not be found!");
             return false;
         }
 
@@ -439,7 +453,7 @@ class MonitGraph
                 /* Different setup for different service types */
                 if ($xml["type"]=="5") {
                     $array["rows"][]["c"]=array(
-                            array("v"=>"%%new Date(".(intVal($record['time'])*1000).")%%"),
+                            array("v"=>"%%new Date(" . (intVal($record['time']) * 1000) . ")%%"),
                             array("v"=>(float)$record->cpu),
                             array("v"=>(float)$record->memory),
                             array("v"=>(float)$record->swap),
@@ -447,13 +461,13 @@ class MonitGraph
                         );
                 } elseif ($xml["type"]=="7") {
                     $array["rows"][]["c"]=array(
-                            array("v"=>"%%new Date(".(intVal($record['time'])*1000).")%%"),
+                            array("v"=>"%%new Date(" . (intVal($record['time']) * 1000) . ")%%"),
                             array("v"=>(float)$record->program_status),
                             array("v"=>(float)$record->alert*100)
                         );
                 } else {
                     $array["rows"][]["c"]=array(
-                            array("v"=>"%%new Date(".(intVal($record['time'])*1000).")%%"),
+                            array("v"=>"%%new Date(" . (intVal($record['time']) * 1000) . ")%%"),
                             array("v"=>(float)$record->cpu),
                             array("v"=>(float)$record->memory),
                             array("v"=>(float)$record->alert*100)
@@ -462,19 +476,19 @@ class MonitGraph
 
                 /* Just checking if we reach memory limit and stop when that happens */
                 if ((memory_get_usage()/$allowed_memory)>0.9) {
-                    error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Memory usage is using over 90% (of $allowed_memory) with currently ".count($array["rows"])." rows (last record with date of ".date("Y-m-d H:i:s P", intVal($record['time']))."). Please increase allowed memory use if you wish parse more data.");
+                    error_log("[" . self::identifier . "] " . __FILE__ . " line " . __LINE__ . ": Memory usage is using over 90% (of $allowed_memory) with currently " . count($array["rows"]) . " rows (last record with date of " . date("Y-m-d H:i:s P", intVal($record['time'])) . "). Please increase allowed memory use if you wish parse more data.");
                     $run_while = false;
                     break;
                 }
             }
 
             /* We check if the next file exists, and load the simplexml object if so */
-            $next_file = $filename.".".(string)$include_file_number;
+            $next_file = $filename . "." . (string)$include_file_number;
             if (file_exists($next_file)) {
                 $xml = null;
                 unset($xml);
                 if (!$xml=simplexml_load_string(file_get_contents($next_file))) {
-                    error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": ".$next_file." could not be opened");
+                    error_log("[" . self::identifier . "] " . __FILE__ . " line " . __LINE__ . ": " . $next_file . " could not be opened");
                     break;
                 }
             } else {
@@ -539,7 +553,7 @@ class MonitGraph
     public static function getInformationServerID($server_id)
     {
         /* First retrieve the server configuration */
-        $server_file = "data/".$server_id."-server.xml";
+        $server_file = self::dataDir() . $server_id . "-server.xml";
         if (!file_exists($server_file) or !$server_xml=simplexml_load_string(file_get_contents($server_file))) {
             error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": $server_file could not be loaded!");
             return false;
@@ -554,7 +568,7 @@ class MonitGraph
     {
         /* Check the directory for the Monit instance ID */
         $files = array();
-        foreach (glob("data/".$server_id."/".$specific_services."*.xml") as $file) {
+        foreach (glob(self::dataDir() . $server_id . "/" . $specific_services . "*.xml") as $file) {
             $files[] = $file;
         }
         return $files;
@@ -568,7 +582,7 @@ class MonitGraph
         if (strlen($xml_file_name)<0) {
             // We are deleting everything to this server id
 
-            $dirname = self::data_path . "/" . $server_id . "/";
+            $dirname = self::dataDir() . $server_id . "/";
 
             // First everything in the data directory
             foreach (glob($dirname."*") as $file) {
@@ -585,16 +599,16 @@ class MonitGraph
             }
 
             // Now the server file
-            $server_file = "data/".$server_id."-server.xml";
+            $server_file = self::dataDir() . $server_id . "-server.xml";
             if (!unlink($server_file)) {
                 error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Could not delete $server_file");
                 return false;
             }
         } else {
             // Only delete specific data file
-            foreach (glob("data/".$server_id."/".$xml_file_name."*") as $file) {
+            foreach (glob(self::dataDir() . $server_id . "/" . $xml_file_name . "*") as $file) {
                 if (!unlink($file)) {
-                    error_log("[".self::identifier."] ".__FILE__." line ".__LINE__.": Could not delete $file");
+                    error_log("[" . self::identifier . "] " . __FILE__ . " line " . __LINE__ . ": Could not delete $file");
                     return false;
                 }
             }

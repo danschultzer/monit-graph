@@ -1,0 +1,2 @@
+<?xml version="1.0"?>
+<server><id>6483e67a077dfe4d67c8ca0ad42a38dc</id><incarnation>1493596613</incarnation><version>5.22.0</version><uptime>12124</uptime><poll>120</poll><startdelay>0</startdelay><localhostname>service</localhostname><controlfile>/etc/monit/monitrc</controlfile><httpd><address>::1</address><port>2812</port><ssl>0</ssl></httpd></server>
