@@ -1,5 +1,7 @@
 # Monit Graph
 
+[![Build Status](https://travis-ci.org/danschultzer/monit-graph.svg?branch=master)](https://travis-ci.org/danschultzer/monit-graph)
+
 Monit Graph is a logging and graphing tool for Monit written in PHP5. It can manage big amounts of data, and will keep a history of Monit statuses.
 
 ![Monit Graph Detail Panel](https://dreamconception.com/images/2012/06/monit-graph-detail1.png)
