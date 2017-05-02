@@ -153,10 +153,6 @@ class Base
             }
         }
 
-        $headers = [];
-        $headers[] = 'Accept: application/xml';
-        $user_agent = 'Cron Monit Graph '.(self::VERSION);
-
         if ($monit_url_ssl) {
             $url = "https://";
         } else {
@@ -164,43 +160,33 @@ class Base
         }
 
         $url .= $monit_url . "/" . $monit_uri_xml;
-        $ch = curl_init($url);
+        $curl = new \Curl\Curl();
+        $curl->setHeader('Accept', 'application/xml');
+        $curl->setUserAgent('Cron Monit Graph ' . self::VERSION);
 
         if ($monit_url_ssl) {
-            curl_setopt($ch, CURLOPT_SSLVERSION, 3);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            $curl->setOpt(CURLOPT_SSL_VERIFYPEER, false);
             if ($verify_ssl) {
-                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+                $curl->setOpt(CURLOPT_SSL_VERIFYHOST, 2);
             } else {
-                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+                $curl->setOpt(CURLOPT_SSL_VERIFYHOST, 0);
             }
         }
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_USERAGENT, $user_agent);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 20);
-        curl_setopt($ch, CURLOPT_TIMEOUT_MS, 20000);
-        curl_setopt($ch, CURLOPT_URL, $url);
-
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // We want a return
+        $curl->setOpt(CURLOPT_TIMEOUT, 20);
+        $curl->setOpt(CURLOPT_RETURNTRANSFER, TRUE);
 
         if ($http_login) {
-            curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC) ;
-            curl_setopt($ch, CURLOPT_USERPWD, $monit_http_username . ":" . $monit_http_password) ;
+            $curl->setOpt(CURLOPT_HTTPAUTH, CURLAUTH_BASIC) ;
+            $curl->setOpt(CURLOPT_USERPWD, $monit_http_username . ":" . $monit_http_password) ;
         }
 
-        $data = curl_exec($ch);
+        $curl->get($url);
 
-        $curl_errno = curl_errno($ch);
-        $curl_error = curl_error($ch);
-
-        curl_close($ch);
-
-        if ($curl_errno > 0) {
-            error_log("[" . self::IDENTIFIER . "] " . __FILE__ . " line " . __LINE__ . ": cURL Error ($curl_errno): $curl_error");
+        if ($curl->error) {
+            error_log("[" . self::IDENTIFIER . "] " . __FILE__ . " line " . __LINE__ . ": cURL Error ($curl->error_code): $curl->error");
         } else {
             libxml_use_internal_errors(true);
-            if ($xml = simplexml_load_string($data)) {
+            if ($xml = simplexml_load_string($curl->response)) {
                 if (isset($xml->server)) {
                     if (self::putSettings($server_id, $xml->server)) {
                         foreach ($xml->service as $service) {
